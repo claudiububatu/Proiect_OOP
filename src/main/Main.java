@@ -18,10 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Class used to run the code
@@ -47,7 +44,7 @@ public final class Main {
 
         Checker.deleteFiles(outputDirectory.listFiles());
 
-        for (int i = 1; i <= Constants.TESTS_NUMBER; i++) {
+        for (int i = 1; i <= 30; i++) {
             String inputpath = "etapa2_proiect/tests/test" + i + Constants.FILE_EXTENSION;
             String outpath = Constants.OUTPUT_PATH + i + Constants.FILE_EXTENSION;
 
@@ -77,17 +74,26 @@ public final class Main {
         final InitialData initialData = g.populateWithDatas(input);
         final List<AnnualChange> annualChanges = g.populateWithChg(input);
         AnnualChildrenPadre annualPadre = new AnnualChildrenPadre();
+
         annualPadre.setAnnualChildren(new ArrayList<>());
         Parent p = new Parent();
         for (int i = 0; i < numberOfYears + 1; i++) {
+            List<String> cities = new ArrayList<>();
+
             AnnualChildren annualChildren = new AnnualChildren();
             annualChildren.setChildren(new ArrayList<>());
             double totalAverageScore = 0;
             double budgetUnit = 0;
             initialData.getChildren().removeIf(child -> child.getAge() > Constants.MAX_TEEN_AGE);
+
+            if (i != numberOfYears) {
+                if (annualChanges.get(i).getStrategy().equals("niceScoreCity")) {
+                    System.out.println(initialData.getChildren());
+                }
+            }
+
             for (Child c : initialData.getChildren()) {
                 int age = c.getAge();
-//                System.out.println(c.getElf());
                 if (age <= Constants.MAX_BABY_AGE) {
                     Baby baby = new Baby(c.getId(), c.getLastName(),
                             c.getFirstName(), age, c.getCity(),
@@ -118,7 +124,9 @@ public final class Main {
                     totalAverageScore += c.getAverageScore();
                     teen.accept(p);
                 }
+                cities.add(c.getCity());
             }
+
             budgetUnit = santaBudget / totalAverageScore;
             for (Child c : initialData.getChildren()) {
                 double budget = c.getAverageScore() * budgetUnit;
@@ -149,37 +157,92 @@ public final class Main {
                 annualGiftPreferences.addAll(c.getGiftsPreferences());
                 c.setReceivedGifts(new ArrayList<>());
                 List<String> childPreferences = c.getGiftsPreferences();
+
                 double budget = c.getAssignedBudget();
                 for (String preference : childPreferences) {
-                    List<Gift> santaGifts = initialData.getGifts();
-                    List<GiftOutput> giftsPerCategory = new ArrayList<>();
+                    List<Gift> santaGifts = initialData.getGifts(); // lista lui mosu
+                    List<GiftOutput> giftsPerCategory = new ArrayList<>(); // lista in care adaug toate cadourile dintr-o categorie
                     for (Gift santaGift : santaGifts) {
-                        if (santaGift.getCategory().equals(preference)) {
-                            String productName = santaGift.getProductName();
-                            double price = santaGift.getPrice();
-                            String category = santaGift.getCategory();
-//                            giftsPerCategory.add(santaGift);
-                            giftsPerCategory.add(new GiftOutput(productName, price, category));
+                        GiftOutput giftOutput = new GiftOutput(santaGift); // e la fel ca santaGift, doar ca fara quantity
+                        if (santaGift.getQuantity() > 0) {
+                            if (santaGift.getCategory().equals(preference)) {
+                                giftsPerCategory.add(giftOutput);
+                            }
                         }
                     }
+
+                    Collections.sort(giftsPerCategory, Comparator.comparing(GiftOutput::getPrice));
+
+
                     if (giftsPerCategory.size() != 0) {
-                        Collections.sort(giftsPerCategory, Comparator.comparing(GiftOutput::getPrice));
+                        boolean received = false;
                         if (giftsPerCategory.get(0).getPrice() <= budget) {
+                            received = true;
                             c.receiveGift(giftsPerCategory.get(0));
                             budget -= giftsPerCategory.get(0).getPrice();
                         }
+
+                        for (Gift santaGift : santaGifts) {
+                            GiftOutput giftOutput = new GiftOutput(santaGift); // e la fel ca santaGift, doar ca fara quantity
+
+                            if (giftOutput.getProductName().equals(giftsPerCategory.get(0).getProductName())) {
+                                if (received) {
+                                    santaGift.decreaseQuantity();
+                                }
+                            }
+                        }
                     }
+
                 }
                 annualChildren.addChildren(new ChildOutput(id, lastName, firstName, city,
                         age, niceScore, annualGiftPreferences, c.getAverageScore(),
                         c.getAssignedBudget(), c.getReceivedGifts()));
                 c.increaseAge();
             }
+
+            annualChildren.sortChildren();
+
             if (i != numberOfYears) {
                 santaBudget = annualChanges.get(i).getNewSantaBudget();
                 List<ChildUpdate> childUpdates = annualChanges.get(i).getChildrenUpdates();
                 List<Child> newChildren = annualChanges.get(i).getNewChildren();
                 List<Gift> newGifts = annualChanges.get(i).getNewGifts();
+                String strategy = annualChanges.get(i).getStrategy();
+
+                if (strategy.compareTo("id") == 0) {
+                    Collections.sort(initialData.getChildren(), Comparator.comparing(Child::getId));
+                } else if (strategy.compareTo("niceScore") == 0) {
+                    Collections.sort(initialData.getChildren(), Comparator.comparing(Child::getAverageScore).
+                            reversed().thenComparing(Child::getId));
+                } else if (strategy.compareTo("niceScoreCity") == 0) {
+                    List<String> noDuplicateCity = new ArrayList<>();
+
+                    for (String city : cities) {
+                        if (!noDuplicateCity.contains(city)) {
+                            noDuplicateCity.add(city);
+                        }
+                    }
+
+                    for (String city : noDuplicateCity) {
+                        int number = 0;
+                        double cityAverageScore = 0;
+
+                        for (Child c : initialData.getChildren()) {
+                            if (c.getCity().equals(city)) {
+                                number += 1;
+                                cityAverageScore += c.getAverageScore();
+                            }
+                        }
+
+                        for (Child c : initialData.getChildren()) {
+                            if (c.getCity().equals(city)) {
+                                c.setNiceScoreCity(cityAverageScore / number);
+                            }
+                        }
+                    }
+                    Collections.sort(initialData.getChildren(), Comparator.comparing(Child::getNiceScoreCity).reversed().thenComparing(Child::getId));
+                }
+
                 if (newGifts.size() != 0) {
                     for (Gift gift : newGifts) {
                         initialData.addGift(gift);
@@ -220,6 +283,8 @@ public final class Main {
             }
 
             annualPadre.addAnnualChildrenPadre(annualChildren);
+
+
         }
 
         fileWriter.writeF(annualPadre);

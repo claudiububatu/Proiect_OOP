@@ -1,6 +1,7 @@
 package datas;
 
 import datas.Gift;
+import pattern.Child;
 import pattern.Visitor;
 
 import java.util.ArrayList;
@@ -18,6 +19,21 @@ public class ChildOutput {
     private List<Double> niceScoreHistory;
     private double assignedBudget;
     private List<GiftOutput> receivedGifts;
+
+    public ChildOutput(Child child) {
+        this.id = child.getId();
+        this.lastName = child.getLastName();
+        this.firstName = child.getFirstName();
+        this.city = child.getCity();
+        this.age = child.getAge();
+
+        this.niceScoreHistory = child.getNiceScoreHistory();
+        this.giftsPreferences = child.getGiftsPreferences();
+        this.averageScore = child.getAverageScore();
+        this.assignedBudget = child.getAssignedBudget();
+        this.receivedGifts = child.getReceivedGifts();
+    }
+
 
     public ChildOutput(final int id, final String lastName,
                  final String firstName, final String city,

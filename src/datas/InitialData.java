@@ -47,4 +47,11 @@ public final class InitialData {
         this.gifts.add(gift);
     }
 
+    @Override
+    public String toString() {
+        return "InitialData{" +
+                "children=" + children +
+                ", gifts=" + gifts +
+                '}';
+    }
 }

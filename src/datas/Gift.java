@@ -54,4 +54,22 @@ public class Gift {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+    public void decreaseQuantity() {
+        this.quantity -= 1;
+    }
+
+    public void increaseQuantity() {
+        this.quantity += 1;
+    }
+
+    @Override
+    public String toString() {
+        return "Gift{" +
+                "productName='" + productName + '\'' +
+                ", price=" + price +
+                ", category='" + category + '\'' +
+                ", quantity=" + quantity +
+                '}';
+    }
 }

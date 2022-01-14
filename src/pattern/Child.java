@@ -21,6 +21,7 @@ public class Child {
 
     private double niceScoreBonus;
     private String elf;
+    private Double niceScoreCity;
 
     public Child(final int id, final String lastName,
                  final String firstName, final String city,
@@ -42,6 +43,15 @@ public class Child {
         this.receivedGifts = receivedGifts;
         this.niceScoreBonus = niceScoreBonus;
         this.elf = elf;
+        this.niceScoreCity = null;
+    }
+
+    public Double getNiceScoreCity() {
+        return niceScoreCity;
+    }
+
+    public void setNiceScoreCity(Double niceScoreCity) {
+        this.niceScoreCity = niceScoreCity;
     }
 
     /**
@@ -253,5 +263,24 @@ public class Child {
      */
     public void accept(final Visitor v) {
         v.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return "Child{" +
+                "id=" + id +
+                ", lastName='" + lastName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", city='" + city + '\'' +
+                ", age=" + age +
+                ", giftsPreferences=" + giftsPreferences +
+                ", averageScore=" + averageScore +
+                ", niceScoreHistory=" + niceScoreHistory +
+                ", assignedBudget=" + assignedBudget +
+                ", receivedGifts=" + receivedGifts +
+                ", niceScoreBonus=" + niceScoreBonus +
+                ", elf='" + elf + '\'' +
+                ", niceScoreCity=" + niceScoreCity +
+                '}';
     }
 }

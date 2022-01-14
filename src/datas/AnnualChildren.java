@@ -1,6 +1,9 @@
 package datas;
 
 import pattern.Child;
+
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public final class AnnualChildren {
@@ -18,6 +21,10 @@ public final class AnnualChildren {
 
     public void setChildren(final List<ChildOutput> children) {
         this.children = children;
+    }
+
+    public void sortChildren() {
+        Collections.sort(this.children, Comparator.comparing(ChildOutput::getId));
     }
 
     /**

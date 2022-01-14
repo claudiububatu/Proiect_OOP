@@ -7,6 +7,13 @@ public class GiftOutput {
 
     public GiftOutput() { }
 
+    public GiftOutput(Gift gift) {
+        this.productName = gift.getProductName();
+        this.price = gift.getPrice();
+        this.category = gift.getCategory();
+    }
+
+
     public GiftOutput(final String productName, final double price,
                 final String category) {
         this.productName = productName;
